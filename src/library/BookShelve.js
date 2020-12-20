@@ -1,13 +1,15 @@
 import React from 'react'
 import Book from './Book'
+import BookShelveHeader from './BookShelvesHeader'
 
 function BookShelve(props) {
+    var bookShelve =props.bookShelve;
     return(
         <div className="bookshelf">
-        <h2 className="bookshelf-title">{props.bookShelve.shelveTitle}</h2>
+        <BookShelveHeader title={bookShelve.shelveTitle}></BookShelveHeader>
         <div className="bookshelf-books">
           <ol className="books-grid">
-            {props.bookShelve.books.map((book) => (
+            {bookShelve.books.map((book) => (
                 <li>
                     <Book book={book}></Book>
                 </li>
