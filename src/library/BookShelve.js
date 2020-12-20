@@ -1,4 +1,5 @@
 import React from 'react'
+import Book from './Book'
 
 function BookShelve(props) {
     return(
@@ -8,22 +9,7 @@ function BookShelve(props) {
           <ol className="books-grid">
             {props.bookShelve.books.map((book) => (
                 <li>
-                    <div className="book">
-                      <div className="book-top">
-                        <div className="book-cover" style={{ width: 128, height: 193, backgroundImage:  `url(${book.coverImage})` }}></div>
-                        <div className="book-shelf-changer">
-                          <select>
-                            <option value="move" disabled>Move to...</option>
-                            <option value="currentlyReading">Currently Reading</option>
-                            <option value="wantToRead" >Want to Read</option>
-                            <option value="read">Read</option>
-                            <option value="none">None</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="book-title">{book.title}</div>
-                      <div className="book-authors">{book.author}</div>
-                    </div>
+                    <Book book={book}></Book>
                 </li>
             ))}
           </ol>
