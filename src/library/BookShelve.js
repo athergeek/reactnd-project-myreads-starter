@@ -9,8 +9,8 @@ function BookShelve(props) {
         <BookShelveHeader title={bookShelve.shelveTitle}></BookShelveHeader>
         <div className="bookshelf-books">
           <ol className="books-grid">
-            {bookShelve.books.map((book) => (
-                <li>
+            {bookShelve.books.map((book, index) => (
+                <li key={index}>
                     <Book book={book}></Book>
                 </li>
             ))}

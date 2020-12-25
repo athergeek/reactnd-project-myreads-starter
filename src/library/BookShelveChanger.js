@@ -1,17 +1,60 @@
 import React from 'react'
+import ToCamelCase from '../Utils'
 
-function BookShelveChanger(props) {
-    return(
-        <div className="book-shelf-changer">
-        <select>
-          <option value="move" disabled>Move to...</option>
-          <option value="currentlyReading">Currently Reading</option>
-          <option value="wantToRead" >Want to Read</option>
-          <option value="read">Read</option>
-          <option value="none">None</option>
-        </select>
-      </div>
-    );
+class BookShelveChanger extends React.Component {
+    constructor(props) {
+        super(props);
+        this.currentShelve = props.currentShelve;
+        this.onShelveChange = props.onShelveChange;
+        this.state = {
+            options : [
+                {
+                  label: "Move to...",
+                  value: "move",
+                },
+                {
+                  label: "Currently Reading",
+                  value: "currentlyReading",
+                },
+                {
+                  label: "Want to Read",
+                  value: "wantToRead",
+                },
+                {
+                  label: "Read",
+                  value: "read",
+                },
+                {
+                    label: "None",
+                    value: "none",
+                },            
+              ],
+              shelve: ToCamelCase(this.currentShelve)   
+        };
+    
+        this.handleChange = this.handleChange.bind(this);
+      }    
+
+    handleChange(e) {
+        console.log("Shelve Selected!! " +  e.target.value);
+        console.log("Changing Bookshelve ");        
+//        this.setState({ shelve: e.target.value });
+        this.onShelveChange(this.state.shelve,e.target.value)
+    };
+
+    render() {
+        return(
+            <div className="book-shelf-changer">
+                <select value={this.state.shelve} onChange={this.handleChange}>
+                    {this.state.options.map((option, index) => (
+                    <option key={index} value={option.value}>{option.label}</option>
+                    ))}
+                </select>
+          </div>
+        );
+    }  
+
 }
+
 
 export default BookShelveChanger;
