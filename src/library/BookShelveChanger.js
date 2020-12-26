@@ -4,8 +4,11 @@ import ToCamelCase from '../Utils'
 class BookShelveChanger extends React.Component {
     constructor(props) {
         super(props);
-        this.currentShelve = props.currentShelve;
-        this.onShelveChange = props.onShelveChange;
+        
+        this.currentShelve = props.book.currentShelve;
+        this.onShelveChange = props.book.onShelveChange;
+        this.bookTitle = props.book.title;
+        this.bookAuthor = props.book.author;
         this.state = {
             options : [
                 {
@@ -39,7 +42,7 @@ class BookShelveChanger extends React.Component {
         console.log("Shelve Selected!! " +  e.target.value);
         console.log("Changing Bookshelve ");        
 //        this.setState({ shelve: e.target.value });
-        this.onShelveChange(this.state.shelve,e.target.value)
+        this.onShelveChange(this.bookTitle,this.bookAuthor, this.state.shelve,e.target.value)
     };
 
     render() {

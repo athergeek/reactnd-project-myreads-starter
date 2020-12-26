@@ -82,11 +82,47 @@ class BooksApp extends React.Component {
     ]    
   }
 
-  changeBookShelve(currentShelve, newShelve) {
+  changeBookShelve(bookTitle, bookAuthor, currentShelve, newShelve) {
     
-    console.log(`Changing shelve from ${currentShelve} to ${newShelve}`)
-    console.log(`Camalized ::: Changing shelve from ${ToCamelCase(currentShelve)} to ${ToCamelCase(newShelve)}`)
+    console.log(`Changing shelve from ${currentShelve} to ${newShelve} for book with title ${bookTitle} and author ${bookAuthor}`)
+    var currentBookShelve = this.getBookshelve(currentShelve);
+    var targetShelve = this.getBookshelve(newShelve);
+    var currentBook = this.getBook(currentBookShelve.books,bookTitle, bookAuthor);
+    targetShelve.books.push(currentBook)
+    
+    var filteredBooks = currentBookShelve.books.filter((book)=> (book.title !== bookTitle && book.author !== bookAuthor ))
+    var currentBookShelveWithBookRemoved = { shelveTitle: currentBookShelve.shelveTitle, books: [...filteredBooks] }
+
+    var updatedBookshelves = this.state.bookShelves.map((shelve) => {
+        if(ToCamelCase(shelve.shelveTitle) === currentShelve) {
+          return currentBookShelveWithBookRemoved
+        } else if(ToCamelCase(shelve.shelveTitle) === newShelve) {
+          return targetShelve
+        } else {
+          return shelve
+        }
+    });
+
+
+    this.setState((prevState) => ({
+      ...prevState,
+      bookShelves: updatedBookshelves
+    }));
+
+
+    console.log("Bookshelves After book removed :::",this.state)  
+    console.log("Updated Bookshelves :::",updatedBookshelves)  
+
   }
+
+  getBookshelve(shelveName) {
+    return this.state.bookShelves.find(shelve => ToCamelCase(shelve.shelveTitle) === shelveName)
+  }
+
+  getBook(books, title, author) {
+    return books.find(book => book.title===title && book.author===author)
+  }
+
   render() {
     return (
       <div className="app">
