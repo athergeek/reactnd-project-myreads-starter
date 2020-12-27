@@ -3,7 +3,6 @@ import BookShelve from './BookShelve'
 import { withRouter } from 'react-router-dom';
 
 function BookList(props) {
-    console.log("BookList props :::: ", props);
     var bookShelves = props.bookShelves;
     var history = props.history;
     return(

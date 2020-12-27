@@ -10,8 +10,6 @@ class BooksApp extends React.Component {
   constructor(props) {
     super(props);
 
-    var books = BooksAPI.getAll();
-    console.log("All Books ::::: ", books);
     this.state = {
       /**
        * TODO: Instead of using this state variable to keep track of which page
@@ -19,7 +17,6 @@ class BooksApp extends React.Component {
        * users can use the browser's back and forward buttons to navigate between
        * pages, as well as provide a good URL they can bookmark and share.
        */
-      showSearchPage: false,
       bookShelves: [
         {
           shelveTitle: "Currently Reading",
@@ -86,12 +83,15 @@ class BooksApp extends React.Component {
   
           ]
         }             
-      ]    
+      ],
+      searchedBooks: []   
     }
 
   }
 
-  changeBookShelve(bookTitle, bookAuthor, currentShelve, newShelve) {
+  changeBookShelve(book, currentShelve, newShelve) {
+    var bookTitle = book.bookTitle;
+    var bookAuthor = book.bookAuthor;
     
     console.log(`Changing shelve from ${currentShelve} to ${newShelve} for book with title ${bookTitle} and author ${bookAuthor}`)
     var currentBookShelve = this.getBookshelve(currentShelve);
@@ -134,10 +134,8 @@ class BooksApp extends React.Component {
   render() {
     return (
       <div className="app">
-          <Route path="/add-book" component={SearchBooks}></Route>
-          <Route exact path="/" component ={() => (
-            <BookList bookShelves={this.state.bookShelves}></BookList>
-          )}></Route>
+          <Route path="/add-book" component={SearchBooks} ></Route>
+          <Route exact path="/" component ={() => (<BookList bookShelves={this.state.bookShelves}></BookList>)}></Route>
       </div>
     )
   }
