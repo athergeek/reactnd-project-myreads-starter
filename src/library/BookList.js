@@ -1,9 +1,11 @@
 import React from 'react'
 import BookShelve from './BookShelve'
+import { withRouter } from 'react-router-dom';
 
 function BookList(props) {
+    console.log("BookList props :::: ", props);
     var bookShelves = props.bookShelves;
-    var onAddBookClick = props.onAddBookClick;
+    var history = props.history;
     return(
      <div className="list-books">
         <div className="list-books-title">
@@ -17,14 +19,14 @@ function BookList(props) {
           </div>
         </div>
         <div className="open-search">
-          <button onClick={() => addBookClicked(onAddBookClick)}>Add a book</button>
+            <button onClick={() => addBookClicked(history)}>Add a book</button>
         </div>
       </div>
     );
 }
 
-function addBookClicked(onAddBookClick) {
-    onAddBookClick({showSearchPage: true})
+function addBookClicked(history) {
+    history.push("/add-book");
 }
 
-export default  BookList
+export default  withRouter(BookList)

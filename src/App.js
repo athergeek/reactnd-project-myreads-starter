@@ -2,6 +2,7 @@ import React from 'react'
 import SearchBooks from './library/SearchBooks'
 import ToCamelCase from './Utils'
 import BookList from './library/BookList'
+import { Route } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
 import './App.css'
 
@@ -130,23 +131,13 @@ class BooksApp extends React.Component {
   getBook(books, title, author) {
     return books.find(book => book.title===title && book.author===author)
   }
-
-  addBookClicked(data) {
-    console.log('addBookClicked ::::', data);
-  }
-
-  searchClosed(data) {
-    console.log('searchClosed ::::', data);
-  }  
-
   render() {
     return (
       <div className="app">
-        {this.state.showSearchPage ? (
-          <SearchBooks onSearchClosed={this.searchClosed}></SearchBooks>
-        ) : (
-          <BookList bookShelves={this.state.bookShelves} onAddBookClick={this.addBookClicked}></BookList>
-        )}
+          <Route path="/add-book" component={SearchBooks}></Route>
+          <Route exact path="/" component ={() => (
+            <BookList bookShelves={this.state.bookShelves}></BookList>
+          )}></Route>
       </div>
     )
   }
