@@ -84,23 +84,77 @@ class BooksApp extends React.Component {
           ]
         }             
       ],
-      searchedBooks: []   
+      searchedBooks: [],
+      searchQuery: ""   
     }
 
   }
 
-  changeBookShelve(book, currentShelve, newShelve) {
+  onSearchPerformed = (query) => {
+    if(query) {
+      var delayTimer = setTimeout(() => {
+
+        BooksAPI.search(query).then((data) => {
+          if(data && data.map) { 
+            var searchedBooks = this.formatResults(data);
+            clearTimeout(this.delayTimer);
+            this.setState((prevState) => {
+              return {
+                searchedBooks: [...searchedBooks]
+              }
+            });
+          }       
+        });
+  
+      }, 1000); 
+
+      this.setState((prevState) => {
+        return {
+          searchQuery: query
+        }
+      })      
+
+   } else {
+    this.setState((prevState) => {
+      return {
+        searchedBooks: [],
+        searchQuery: ""
+      }
+    }) 
+   }
+  }
+
+  formatResults = (searchedBooks) => {
+
+      return searchedBooks.map((book) => {
+        return {
+            coverImage: book.imageLinks && book.imageLinks.thumbnail ? book.imageLinks.thumbnail : "http://books.google.com/books/content?id=PGR2AwAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE73-GnPVEyb7MOCxDzOYF1PTQRuf6nCss9LMNOSWBpxBrz8Pm2_mFtWMMg_Y1dx92HT7cUoQBeSWjs3oEztBVhUeDFQX6-tWlWz1-feexS0mlJPjotcwFqAg6hBYDXuK_bkyHD-y&source=gbs_api" ,
+            currentShelve: "None",
+            title: book.title,
+            author: book.authors && book.authors.length > 0 ? book.authors[0] : 'Unknown',
+            onShelveChange: this.changeBookShelve.bind(this)              
+        }
+      });
+  }
+
+  changeBookShelve = (book, currentShelve, newShelve) => {
     var bookTitle = book.bookTitle;
     var bookAuthor = book.bookAuthor;
     
-    console.log(`Changing shelve from ${currentShelve} to ${newShelve} for book with title ${bookTitle} and author ${bookAuthor}`)
     var currentBookShelve = this.getBookshelve(currentShelve);
     var targetShelve = this.getBookshelve(newShelve);
-    var currentBook = this.getBook(currentBookShelve.books,bookTitle, bookAuthor);
-    targetShelve.books.push(currentBook)
+    var currentBookShelveWithBookRemoved = undefined;
+    if(currentBookShelve) { // if currentShelve != None
+      var currentBook = this.getBook(currentBookShelve.books,bookTitle, bookAuthor);
+      targetShelve.books.push(currentBook)
+      var filteredBooks = currentBookShelve.books.filter((book)=> (book.title !== bookTitle && book.author !== bookAuthor ))      
+      currentBookShelveWithBookRemoved = { shelveTitle: currentBookShelve.shelveTitle, books: [...filteredBooks] }      
+    } else { // if currentShelve == None
+      targetShelve.books.push({...book})
+    }
     
-    var filteredBooks = currentBookShelve.books.filter((book)=> (book.title !== bookTitle && book.author !== bookAuthor ))
-    var currentBookShelveWithBookRemoved = { shelveTitle: currentBookShelve.shelveTitle, books: [...filteredBooks] }
+
+
 
     var updatedBookshelves = this.state.bookShelves.map((shelve) => {
         if(ToCamelCase(shelve.shelveTitle) === currentShelve) {
@@ -124,17 +178,17 @@ class BooksApp extends React.Component {
 
   }
 
-  getBookshelve(shelveName) {
+  getBookshelve = (shelveName) => {
     return this.state.bookShelves.find(shelve => ToCamelCase(shelve.shelveTitle) === shelveName)
   }
 
-  getBook(books, title, author) {
+  getBook = (books, title, author) => {
     return books.find(book => book.title===title && book.author===author)
   }
   render() {
     return (
       <div className="app">
-          <Route path="/add-book" component={SearchBooks} ></Route>
+          <Route path="/add-book" component={() => (<SearchBooks books={this.state.searchedBooks} searchQuery={this.state.searchQuery} searchBooks={this.onSearchPerformed}></SearchBooks>)} ></Route>
           <Route exact path="/" component ={() => (<BookList bookShelves={this.state.bookShelves}></BookList>)}></Route>
       </div>
     )
