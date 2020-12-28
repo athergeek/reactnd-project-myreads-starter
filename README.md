@@ -27,6 +27,13 @@ To get started developing right away:
     │   ├── add.svg
     │   ├── arrow-back.svg
     │   └── arrow-drop-down.svg
+    ├── Library # Contains all components for book read applicaiton
+    │   ├── Book.js # Book component which represents a single book to display. It contains BookShelveChanger that allows to change shelve for a book.
+    │   ├── BookList.js # Displays list of shelves and books inside each shelve.
+    │   ├── BookShelve.js # A component to display book shelve with its books
+    │   ├── BookShelveChagner.js # A component that has the functionality to change shele for a book
+    │   ├── BookShelveHeader.js # A component representing header of a bookshelve
+    │   ├── SearchBooks.js # A component representing search book functionality
     ├── index.css # Global styles. You probably won't need to change anything here.
     └── index.js # You should not need to modify this file. It is used for DOM rendering only.
 ```
