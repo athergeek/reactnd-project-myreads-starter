@@ -157,6 +157,7 @@ class BooksApp extends React.Component {
       return books.map((book) => {
         if(searchedBooks) {
             return {
+              id: book.id,
               coverImage: book.imageLinks && book.imageLinks.thumbnail ? book.imageLinks.thumbnail : "http://books.google.com/books/content?id=PGR2AwAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE73-GnPVEyb7MOCxDzOYF1PTQRuf6nCss9LMNOSWBpxBrz8Pm2_mFtWMMg_Y1dx92HT7cUoQBeSWjs3oEztBVhUeDFQX6-tWlWz1-feexS0mlJPjotcwFqAg6hBYDXuK_bkyHD-y&source=gbs_api" ,
               currentShelve: "None",
               title: book.title,
@@ -165,6 +166,7 @@ class BooksApp extends React.Component {
           }
         } else {
             return {
+              id: book.id,
               coverImage: book.imageLinks && book.imageLinks.thumbnail ? book.imageLinks.thumbnail : "http://books.google.com/books/content?id=PGR2AwAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE73-GnPVEyb7MOCxDzOYF1PTQRuf6nCss9LMNOSWBpxBrz8Pm2_mFtWMMg_Y1dx92HT7cUoQBeSWjs3oEztBVhUeDFQX6-tWlWz1-feexS0mlJPjotcwFqAg6hBYDXuK_bkyHD-y&source=gbs_api" ,
               currentShelve: this.startCase(book.shelf),
               title: book.title,
@@ -188,6 +190,14 @@ class BooksApp extends React.Component {
     var bookTitle = book.title;
     var bookAuthor = book.author;
     if(newShelve !== 'none') { // Do not allow to switch to 'none' shelve
+
+        BooksAPI.update(book, newShelve).then((response) => {
+          console.log('Book shelf changed successfully :::: ', response);          
+
+        }).catch((error)=> {
+          console.log('Error while changeing book shelf :::: ', error);
+        });
+
         var currentBookShelve = this.getBookshelve(currentShelve);
         var targetShelve = this.getBookshelve(newShelve);
         var targetShelve = (targetShelve === undefined) ? { shelveTitle: newShelve, books: []} : targetShelve;
