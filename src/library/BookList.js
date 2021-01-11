@@ -12,9 +12,9 @@ function BookList(props) {
         </div>
         <div className="list-books-content">
           <div>
-              {bookShelves.map((bookShelve, index)=> (
+              {bookShelves.map ? bookShelves.map((bookShelve, index)=> (
                 <BookShelve key={index} bookShelve={bookShelve}></BookShelve>
-              ))}
+              )) : ''}
           </div>
         </div>
         <div className="open-search">

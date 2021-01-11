@@ -39,8 +39,7 @@ class BookShelveChanger extends React.Component {
       }    
 
     handleChange(e) {
-        console.log("Shelve Selected!! " +  e.target.value);
-        console.log("Changing Bookshelve ");        
+        console.log(`Changing Bookshelve from ${this.state.shelve} To ${e.target.value} `);        
         this.onShelveChange(this.props.book, this.state.shelve,e.target.value)
     };
 

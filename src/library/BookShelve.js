@@ -9,11 +9,11 @@ function BookShelve(props) {
         <BookShelveHeader title={bookShelve.shelveTitle}></BookShelveHeader>
         <div className="bookshelf-books">
           <ol className="books-grid">
-            {bookShelve.books.map((book, index) => (
+            {bookShelve.books && bookShelve.books.map ? bookShelve.books.map((book, index) => (
                 <li key={index}>
                     <Book book={book}></Book>
                 </li>
-            ))}
+            )) : ''}
           </ol>
         </div>
       </div>        
