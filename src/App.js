@@ -91,37 +91,40 @@ class BooksApp extends React.Component {
   }
 
   onSearchPerformed = (query) => {
-    if(query) {
-      var delayTimer = setTimeout(() => {
 
-        BooksAPI.search(query).then((data) => {
-          if(data && data.map) { 
-            var searchedBooks = this.formatResults(data);
-            clearTimeout(this.delayTimer);
-            this.setState((prevState) => {
-              return {
-                searchedBooks: [...searchedBooks]
-              }
-            });
-          }       
-        });
-  
-      }, 1000); 
+              if(query || query.trim().length > 0) {
+                  BooksAPI.search(query).then((data) => {
+                    console.log('API-Query :::: ', query);           
+                    if(data && data.map) { 
+                      var searchedBooks = this.formatResults(data);
+
+                      this.setState((prevState) => {
+                        return {
+                          ...prevState,          
+                          searchedBooks: [...searchedBooks]
+                        }
+                      });
+                    }       
+                  }); 
+            } else {
+              console.log('Query :::: ', query);     
+              this.setState((prevState) => {
+                return {
+                  ...prevState,        
+                  searchedBooks: [],
+                  searchQuery: ""
+                }
+              }) 
+            }
+
 
       this.setState((prevState) => {
         return {
+          ...prevState,          
           searchQuery: query
         }
-      })      
-
-   } else {
-    this.setState((prevState) => {
-      return {
-        searchedBooks: [],
-        searchQuery: ""
-      }
-    }) 
-   }
+      });
+           
   }
 
   formatResults = (searchedBooks) => {
@@ -138,41 +141,42 @@ class BooksApp extends React.Component {
   }
 
   changeBookShelve = (book, currentShelve, newShelve) => {
-    var bookTitle = book.bookTitle;
-    var bookAuthor = book.bookAuthor;
-    
-    var currentBookShelve = this.getBookshelve(currentShelve);
-    var targetShelve = this.getBookshelve(newShelve);
-    var currentBookShelveWithBookRemoved = undefined;
-    if(currentBookShelve) { // if currentShelve != None
-      var currentBook = this.getBook(currentBookShelve.books,bookTitle, bookAuthor);
-      targetShelve.books.push(currentBook)
-      var filteredBooks = currentBookShelve.books.filter((book)=> (book.title !== bookTitle && book.author !== bookAuthor ))      
-      currentBookShelveWithBookRemoved = { shelveTitle: currentBookShelve.shelveTitle, books: [...filteredBooks] }      
-    } else { // if currentShelve == None
-      targetShelve.books.push({...book})
-    }
-    
-
-
-
-    var updatedBookshelves = this.state.bookShelves.map((shelve) => {
-        if(ToCamelCase(shelve.shelveTitle) === currentShelve) {
-          return currentBookShelveWithBookRemoved
-        } else if(ToCamelCase(shelve.shelveTitle) === newShelve) {
-          return targetShelve
-        } else {
-          return shelve
+    var bookTitle = book.title;
+    var bookAuthor = book.author;
+    if(newShelve !== 'none') { // Do not allow to switch to 'none' shelve
+        var currentBookShelve = this.getBookshelve(currentShelve);
+        var targetShelve = this.getBookshelve(newShelve);
+        var currentBookShelveWithBookRemoved = undefined;
+        if(currentBookShelve) { // if currentShelve != None
+          var currentBook = this.getBook(currentBookShelve.books,bookTitle, bookAuthor);
+          currentBook.currentShelve = newShelve;
+          targetShelve.books.push(currentBook)
+          var filteredBooks = currentBookShelve.books.filter((book)=> (book.title !== bookTitle && book.author !== bookAuthor ))      
+          currentBookShelveWithBookRemoved = { shelveTitle: currentBookShelve.shelveTitle, books: [...filteredBooks] }      
+        } else { // if currentShelve == None
+          targetShelve.books.push({...book})
         }
-    });
+        
 
 
-    this.setState((prevState) => ({
-      ...prevState,
-      bookShelves: updatedBookshelves
-    }));
+
+        var updatedBookshelves = this.state.bookShelves.map((shelve) => {
+            if(ToCamelCase(shelve.shelveTitle) === currentShelve) {
+              return currentBookShelveWithBookRemoved
+            } else if(ToCamelCase(shelve.shelveTitle) === newShelve) {
+              return targetShelve
+            } else {
+              return shelve
+            }
+        });
 
 
+        this.setState((prevState) => ({
+          ...prevState,
+          bookShelves: updatedBookshelves
+        }));
+
+   }
     console.log("Bookshelves After book removed :::",this.state)  
     console.log("Updated Bookshelves :::",updatedBookshelves)  
 

@@ -5,11 +5,14 @@ import { withRouter } from 'react-router-dom';
 class SearchBooks  extends React.Component {
     constructor(props) {
       super(props);
+      this.state = {
+        query : props.searchQuery,
+        delay : undefined
+      };
+
       this.history = props.history;
       this.books = props.books;
       this.searchBooks = props.searchBooks;
-      this.searchQuery = props.searchQuery;
-      this.delayTimer = undefined;
     }
 
     componentDidMount() {
@@ -17,8 +20,27 @@ class SearchBooks  extends React.Component {
     }
 
     onValueChanged(e) {
-      var query =  e.target && e.target.value ? e.target.value.trim() : '';        
-      this.searchBooks(query);
+      var query =  e.target && e.target.value ? e.target.value : '';  
+      if(this.state.delay) {
+        clearTimeout(this.state.delay);
+      }
+
+      this.setState((previousState) => {
+        return {
+          ...previousState,
+          delay: setTimeout(() => {
+            this.searchBooks(query);
+        }, 1000)
+        }
+      });
+
+      this.setState((previousState) => {
+        return {
+          ...previousState,
+          query: query,
+        }
+      });      
+
     }
 
     onSearchClosed() {
@@ -40,7 +62,7 @@ class SearchBooks  extends React.Component {
                 However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
                 you don't find a specific author or title. Every search is limited by search terms.
               */}
-              <input id="search" type="text" placeholder="Search by title or author" value={this.searchQuery}  onChange={(e) => this.onValueChanged(e)}/>
+              <input id="search" type="text" placeholder="Search by title or author" value={this.state.query}  onChange={(e) => this.onValueChanged(e)}/>
 
             </div>
           </div>
