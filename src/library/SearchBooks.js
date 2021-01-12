@@ -5,6 +5,7 @@ import { withRouter } from 'react-router-dom';
 class SearchBooks  extends React.Component {
     constructor(props) {
       super(props);
+
       this.state = {
         query : props.searchQuery,
         delay : undefined

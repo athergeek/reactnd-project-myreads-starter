@@ -35,6 +35,7 @@ class BookShelveChanger extends React.Component {
               shelve: ToCamelCase(this.currentShelve)   
         };
     
+        console.log("BookShelveChanger.this.state ::: ", this.state);
         this.handleChange = this.handleChange.bind(this);
       }    
 

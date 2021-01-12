@@ -47,9 +47,24 @@ class BooksApp extends React.Component {
   onSearchPerformed = (query) => {
 
               if(query || query.trim().length > 0) {
-                  BooksAPI.search(query).then((data) => {
-                    if(data && data.map) { 
-                      var searchedBooks = this.formatResults(data, true);
+                  BooksAPI.search(query).then((books) => {
+                    if(books && books.map) { 
+
+                      books.map((book) => {
+                        var allBooks = this.getAllBooksInShelves();
+                        var bookInShelf = allBooks.find((b) => { return b.id === book.id });
+                        
+                        if(bookInShelf) {
+                          book.shelf = ToCamelCase(bookInShelf.currentShelve);
+                        } else {
+                          book.shelf = "none"
+                        }
+
+                        return book;
+                      });
+
+
+                      var searchedBooks = this.formatResults(books, true);
 
                       this.setState((prevState) => {
                         return {
@@ -81,12 +96,14 @@ class BooksApp extends React.Component {
 
   formatResults = (books, searchedBooks) => {
 
+//      console.log("Before formatting :::: ", books);
+
       return books.map((book) => {
         if(searchedBooks) {
             return {
               id: book.id,
               coverImage: book.imageLinks && book.imageLinks.thumbnail ? book.imageLinks.thumbnail : "http://books.google.com/books/content?id=PGR2AwAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE73-GnPVEyb7MOCxDzOYF1PTQRuf6nCss9LMNOSWBpxBrz8Pm2_mFtWMMg_Y1dx92HT7cUoQBeSWjs3oEztBVhUeDFQX6-tWlWz1-feexS0mlJPjotcwFqAg6hBYDXuK_bkyHD-y&source=gbs_api" ,
-              currentShelve: "None",
+              currentShelve: this.startCase(book.shelf),
               title: book.title,
               author: book.authors && book.authors.length > 0 ? book.authors[0] : 'Unknown',
               onShelveChange: this.changeBookShelve.bind(this)              
@@ -111,6 +128,15 @@ class BooksApp extends React.Component {
       var finalResult = result.charAt(0).toUpperCase() + result.slice(1);
       return finalResult;
     }
+  }
+
+  getAllBooksInShelves() {
+    var allBooks = [];
+    this.state.bookShelves.map((shelf) => {
+      allBooks = [... shelf.books];
+    });
+
+    return allBooks;
   }
 
   changeBookShelve = (book, currentShelve, newShelve) => {
