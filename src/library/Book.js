@@ -7,7 +7,7 @@ function Book(props) {
         <div className="book">
         <div className="book-top">
           <div className="book-cover" style={{ width: 128, height: 193, backgroundImage:  `url(${book.coverImage})` }}></div>
-          <BookShelveChanger book={book} onShelveChange={book.onShelveChange}></BookShelveChanger>
+          <BookShelveChanger book={book} onShelveChange={book.onShelveChange} isFromSearchPage={props.isFromSearchPage}></BookShelveChanger>
         </div>
         <div className="book-title">{book.title}</div>
         <div className="book-authors">{book.author}</div>

@@ -1,5 +1,5 @@
 import React from 'react'
-import ToCamelCase from '../Utils'
+import { toCamelCase } from '../Utils'
 
 class BookShelveChanger extends React.Component {
     constructor(props) {
@@ -32,16 +32,14 @@ class BookShelveChanger extends React.Component {
                     value: "none",
                 },            
               ],
-              shelve: ToCamelCase(this.currentShelve)   
+              shelve: toCamelCase(this.currentShelve)   
         };
-    
-        console.log("BookShelveChanger.this.state ::: ", this.state);
         this.handleChange = this.handleChange.bind(this);
       }    
 
     handleChange(e) {
         console.log(`Changing Bookshelve from ${this.state.shelve} To ${e.target.value} `);        
-        this.onShelveChange(this.props.book, this.state.shelve,e.target.value)
+        this.onShelveChange(this.props.book, this.state.shelve,e.target.value, this.props.isFromSearchPage)
     };
 
     render() {

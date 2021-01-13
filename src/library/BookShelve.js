@@ -11,7 +11,7 @@ function BookShelve(props) {
           <ol className="books-grid">
             {bookShelve.books && bookShelve.books.map ? bookShelve.books.map((book, index) => (
                 <li key={index}>
-                    <Book book={book}></Book>
+                    <Book book={book} isFromSearchPage={false}></Book>
                 </li>
             )) : ''}
           </ol>

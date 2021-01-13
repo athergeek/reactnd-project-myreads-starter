@@ -1,6 +1,6 @@
 import React from 'react'
 import SearchBooks from './library/SearchBooks'
-import ToCamelCase from './Utils'
+import { toCamelCase, formatResults } from './Utils'
 import BookList from './library/BookList'
 import { Route } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
@@ -21,13 +21,14 @@ class BooksApp extends React.Component {
   componentDidMount() {
     BooksAPI.getAll().then((response) => {
       console.log('Response ::: ', response);
-      var books = this.formatResults(response, false);
+      var books = formatResults(response, this.changeBookShelve.bind(this));
       var bookShelves = [];
       var currentShelve = {};
       console.log("Books ::: ", books);      
-      books.map((currentBook) => {
+      books.forEach((currentBook) => {
         if(currentShelve.name !==  currentBook.currentShelve) {
           currentShelve.name = currentBook.currentShelve;
+          currentBook.onShelveChange= this.changeBookShelve.bind(this)   
           bookShelves.push({
             shelveTitle: currentBook.currentShelve,
             books: books.filter((book) => book.currentShelve === currentBook.currentShelve)
@@ -44,102 +45,7 @@ class BooksApp extends React.Component {
     });
   }
 
-  onSearchPerformed = (query) => {
-
-              if(query || query.trim().length > 0) {
-                  BooksAPI.search(query).then((books) => {
-                    if(books && books.map) { 
-
-                      books.map((book) => {
-                        var allBooks = this.getAllBooksInShelves();
-                        var bookInShelf = allBooks.find((b) => { return b.id === book.id });
-                        
-                        if(bookInShelf) {
-                          book.shelf = ToCamelCase(bookInShelf.currentShelve);
-                        } else {
-                          book.shelf = "none"
-                        }
-
-                        return book;
-                      });
-
-
-                      var searchedBooks = this.formatResults(books, true);
-
-                      this.setState((prevState) => {
-                        return {
-                          ...prevState,          
-                          searchedBooks: [...searchedBooks]
-                        }
-                      });
-                    }       
-                  }); 
-            } else {
-              this.setState((prevState) => {
-                return {
-                  ...prevState,        
-                  searchedBooks: [],
-                  searchQuery: ""
-                }
-              }) 
-            }
-
-
-      this.setState((prevState) => {
-        return {
-          ...prevState,          
-          searchQuery: query
-        }
-      });
-           
-  }
-
-  formatResults = (books, searchedBooks) => {
-
-//      console.log("Before formatting :::: ", books);
-
-      return books.map((book) => {
-        if(searchedBooks) {
-            return {
-              id: book.id,
-              coverImage: book.imageLinks && book.imageLinks.thumbnail ? book.imageLinks.thumbnail : "http://books.google.com/books/content?id=PGR2AwAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE73-GnPVEyb7MOCxDzOYF1PTQRuf6nCss9LMNOSWBpxBrz8Pm2_mFtWMMg_Y1dx92HT7cUoQBeSWjs3oEztBVhUeDFQX6-tWlWz1-feexS0mlJPjotcwFqAg6hBYDXuK_bkyHD-y&source=gbs_api" ,
-              currentShelve: this.startCase(book.shelf),
-              title: book.title,
-              author: book.authors && book.authors.length > 0 ? book.authors[0] : 'Unknown',
-              onShelveChange: this.changeBookShelve.bind(this)              
-          }
-        } else {
-            return {
-              id: book.id,
-              coverImage: book.imageLinks && book.imageLinks.thumbnail ? book.imageLinks.thumbnail : "http://books.google.com/books/content?id=PGR2AwAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE73-GnPVEyb7MOCxDzOYF1PTQRuf6nCss9LMNOSWBpxBrz8Pm2_mFtWMMg_Y1dx92HT7cUoQBeSWjs3oEztBVhUeDFQX6-tWlWz1-feexS0mlJPjotcwFqAg6hBYDXuK_bkyHD-y&source=gbs_api" ,
-              currentShelve: this.startCase(book.shelf),
-              title: book.title,
-              author: book.authors && book.authors.length > 0 ? book.authors[0] : 'Unknown',
-              onShelveChange: this.changeBookShelve.bind(this)              
-          }          
-        }
-      });
-  }
-
-  startCase(str) {
-    console.log('str :::: ',str);
-    if(str) {
-      var result = str.replace( /([A-Z])/g, " $1" );
-      var finalResult = result.charAt(0).toUpperCase() + result.slice(1);
-      return finalResult;
-    }
-  }
-
-  getAllBooksInShelves() {
-    var allBooks = [];
-    this.state.bookShelves.map((shelf) => {
-      allBooks = [... shelf.books];
-    });
-
-    return allBooks;
-  }
-
-  changeBookShelve = (book, currentShelve, newShelve) => {
+  changeBookShelve = (book, currentShelve, newShelve, isFromSearchPage) => {
     var bookTitle = book.title;
     var bookAuthor = book.author;
     if(newShelve !== 'none') { // Do not allow to switch to 'none' shelve
@@ -153,7 +59,7 @@ class BooksApp extends React.Component {
 
         var currentBookShelve = this.getBookshelve(currentShelve);
         var targetShelve = this.getBookshelve(newShelve);
-        var targetShelve = (targetShelve === undefined) ? { shelveTitle: newShelve, books: []} : targetShelve;
+        targetShelve = (targetShelve === undefined) ? { shelveTitle: newShelve, books: []} : targetShelve;
         var currentBookShelveWithBookRemoved = undefined;
         if(currentBookShelve) { // if currentShelve != None
           var currentBook = this.getBook(currentBookShelve.books,bookTitle, bookAuthor);
@@ -170,20 +76,21 @@ class BooksApp extends React.Component {
 
 
         var updatedBookshelves = this.state.bookShelves.map((shelve) => {
-            if(ToCamelCase(shelve.shelveTitle) === currentShelve) {
+            if(toCamelCase(shelve.shelveTitle) === currentShelve) {
               return currentBookShelveWithBookRemoved
-            } else if(ToCamelCase(shelve.shelveTitle) === newShelve) {
+            } else if(toCamelCase(shelve.shelveTitle) === newShelve) {
               return targetShelve
             } else {
               return shelve
             }
         });
 
-
-        this.setState((prevState) => ({
-          ...prevState,
-          bookShelves: updatedBookshelves
-        }));
+        if(!isFromSearchPage) {
+            this.setState((prevState) => ({
+              ...prevState,
+              bookShelves: updatedBookshelves
+            }));
+        }
 
    }
     console.log("Bookshelves After book removed :::",this.state)  
@@ -192,7 +99,7 @@ class BooksApp extends React.Component {
   }
 
   getBookshelve = (shelveName) => {
-    return this.state.bookShelves.find(shelve => ToCamelCase(shelve.shelveTitle) === shelveName)
+    return this.state.bookShelves.find(shelve => toCamelCase(shelve.shelveTitle) === shelveName)
   }
 
   getBook = (books, title, author) => {
@@ -201,7 +108,7 @@ class BooksApp extends React.Component {
   render() {
     return (
       <div className="app">
-          <Route path="/add-book" component={() => (<SearchBooks books={this.state.searchedBooks} searchQuery={this.state.searchQuery} searchBooks={this.onSearchPerformed}></SearchBooks>)} ></Route>
+          <Route path="/add-book" component={() => (<SearchBooks bookShelves={this.state.bookShelves} onChangeBookShelf={ this.changeBookShelve.bind(this) }></SearchBooks>)} ></Route>
           <Route exact path="/" component ={() => (<BookList bookShelves={this.state.bookShelves}></BookList>)}></Route>
       </div>
     )

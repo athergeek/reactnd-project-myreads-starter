@@ -1,6 +1,8 @@
 import React from 'react'
 import Book from './Book'
+import { toCamelCase, formatResults } from '../Utils'
 import { withRouter } from 'react-router-dom';
+import * as BooksAPI from '../BooksAPI'
 
 class SearchBooks  extends React.Component {
     constructor(props) {
@@ -8,12 +10,12 @@ class SearchBooks  extends React.Component {
 
       this.state = {
         query : props.searchQuery,
+        bookShelves : props.bookShelves,        
+        books : [],
         delay : undefined
       };
 
       this.history = props.history;
-      this.books = props.books;
-      this.searchBooks = props.searchBooks;
     }
 
     componentDidMount() {
@@ -44,6 +46,48 @@ class SearchBooks  extends React.Component {
 
     }
 
+
+    searchBooks = (query) => {
+
+        if(query || query.trim().length > 0) {
+            BooksAPI.search(query).then((books) => {
+              if(books && books.map) { 
+
+                books.map((book) => {
+                  var allBooks = this.getAllBooksInShelves();
+                  var bookInShelf = allBooks.find((b) => { return b.id === book.id });
+                                    
+                  if(bookInShelf) {
+                    book.shelf = toCamelCase(bookInShelf.currentShelve);
+                  } else {
+                    book.shelf = "none"
+                  }
+
+                  return book;
+                });
+
+
+                var searchedBooks = formatResults(books, this.props.onChangeBookShelf);
+
+                this.setState((prevState) => {
+                  return {
+                    ...prevState,          
+                    books: [...searchedBooks]
+                  }
+                });
+              }       
+            }); 
+      } else {
+        this.setState((prevState) => {
+          return {
+            ...prevState,        
+            books: [],
+            query: ""
+          }
+        }) 
+      }
+  }    
+
     onSearchClosed() {
         this.history.push("/");
     }
@@ -63,15 +107,15 @@ class SearchBooks  extends React.Component {
                 However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
                 you don't find a specific author or title. Every search is limited by search terms.
               */}
-              <input id="search" type="text" placeholder="Search by title or author" value={this.state.query}  onChange={(e) => this.onValueChanged(e)}/>
+              <input id="search" type="text" placeholder="Search by title or author" value={this.state.query || ''}  onChange={(e) => this.onValueChanged(e)} ref={(input)=> this.seach = input}/>
 
             </div>
           </div>
           <div className="search-books-results">
             <ol className="books-grid">
-              {this.books && this.books.map ? this.books.map((book, index) => (
+              {this.state.books && this.state.books.map ? this.state.books.map((book, index) => (
                   <li key={index}>
-                      <Book book={book}></Book>
+                      <Book book={book} isFromSearchPage={true}></Book>
                   </li>
               )) : ''}
             </ol>
@@ -79,6 +123,16 @@ class SearchBooks  extends React.Component {
         </div>
       );
     }
+
+
+    getAllBooksInShelves() {
+      var allBooks = [];
+      this.props.bookShelves.forEach((shelf) => {
+        allBooks.push(...shelf.books);
+      });
+  
+      return allBooks;
+    }    
 }
 
 
