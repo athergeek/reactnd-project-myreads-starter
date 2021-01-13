@@ -48,53 +48,64 @@ class BooksApp extends React.Component {
   changeBookShelve = (book, currentShelve, newShelve, isFromSearchPage) => {
     var bookTitle = book.title;
     var bookAuthor = book.author;
-    if(newShelve !== 'none') { // Do not allow to switch to 'none' shelve
+    var updatedBookshelves = [];
+    
+    BooksAPI.update(book, newShelve).then((response) => {
+      console.log('Book shelf changed successfully :::: ', response);          
 
-        BooksAPI.update(book, newShelve).then((response) => {
-          console.log('Book shelf changed successfully :::: ', response);          
-
-        }).catch((error)=> {
-          console.log('Error while changeing book shelf :::: ', error);
-        });
-
-        var currentBookShelve = this.getBookshelve(currentShelve);
-        var targetShelve = this.getBookshelve(newShelve);
-        targetShelve = (targetShelve === undefined) ? { shelveTitle: newShelve, books: []} : targetShelve;
-        var currentBookShelveWithBookRemoved = undefined;
-        if(currentBookShelve) { // if currentShelve != None
-          var currentBook = this.getBook(currentBookShelve.books,bookTitle, bookAuthor);
-          currentBook.currentShelve = newShelve;
-          targetShelve.books.push(currentBook)
-          var filteredBooks = currentBookShelve.books.filter((book)=> (book.title !== bookTitle && book.author !== bookAuthor ))      
-          currentBookShelveWithBookRemoved = { shelveTitle: currentBookShelve.shelveTitle, books: [...filteredBooks] }      
-        } else { // if currentShelve == None
-          book.currentShelve = newShelve;
-          targetShelve.books.push({...book})
-        }
-        
-
-
-
-        var updatedBookshelves = this.state.bookShelves.map((shelve) => {
-            if(toCamelCase(shelve.shelveTitle) === currentShelve) {
-              return currentBookShelveWithBookRemoved
-            } else if(toCamelCase(shelve.shelveTitle) === newShelve) {
-              return targetShelve
-            } else {
-              return shelve
+            if(newShelve !== 'none') { // Do not allow to switch to 'none' shelve
+            var currentBookShelve = this.getBookshelve(currentShelve);
+            var targetShelve = this.getBookshelve(newShelve);
+            targetShelve = (targetShelve === undefined) ? { shelveTitle: newShelve, books: []} : targetShelve;
+            var currentBookShelveWithBookRemoved = undefined;
+            if(currentBookShelve) { // if currentShelve != None
+              var currentBook = this.getBook(currentBookShelve.books,bookTitle, bookAuthor);
+              currentBook.currentShelve = newShelve;
+              targetShelve.books.push(currentBook)
+              var filteredBooks = currentBookShelve.books.filter((book)=> (book.title !== bookTitle && book.author !== bookAuthor ))      
+              currentBookShelveWithBookRemoved = { shelveTitle: currentBookShelve.shelveTitle, books: [...filteredBooks] }      
+            } else { // if currentShelve == None
+              book.currentShelve = newShelve;
+              targetShelve.books.push({...book})
             }
-        });
+
+            updatedBookshelves = this.state.bookShelves.map((shelve) => {
+                if(toCamelCase(shelve.shelveTitle) === currentShelve) {
+                  return currentBookShelveWithBookRemoved
+                } else if(toCamelCase(shelve.shelveTitle) === newShelve) {
+                  return targetShelve
+                } else {
+                  return shelve
+                }
+            });
+
+      } else { // Remove  book from current shelf if newShelve === none
+        var currentBookShelve = this.getBookshelve(currentShelve);
+        var filteredBooks = currentBookShelve.books.filter((book)=> (book.title !== bookTitle && book.author !== bookAuthor ))      
+        currentBookShelveWithBookRemoved = { shelveTitle: currentBookShelve.shelveTitle, books: [...filteredBooks] }       
+        updatedBookshelves = this.state.bookShelves.map((shelve) => {
+          if(toCamelCase(shelve.shelveTitle) === currentShelve) {
+            return currentBookShelveWithBookRemoved
+          } else {
+            return shelve
+          }
+      });
+      }
+
 
         if(!isFromSearchPage) {
-            this.setState((prevState) => ({
-              ...prevState,
-              bookShelves: updatedBookshelves
-            }));
-        }
+          this.setState((prevState) => ({
+            ...prevState,
+            bookShelves: updatedBookshelves
+          }));
+        }   
+        console.log("Bookshelves After book removed :::",this.state)  
+        console.log("Updated Bookshelves :::",updatedBookshelves)  
 
-   }
-    console.log("Bookshelves After book removed :::",this.state)  
-    console.log("Updated Bookshelves :::",updatedBookshelves)  
+
+    }).catch((error)=> {
+      console.log('Error while changeing book shelf :::: ', error);
+    });
 
   }
 
